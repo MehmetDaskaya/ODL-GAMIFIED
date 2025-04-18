@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Protector: Beat the Hacker</title>
+    <style>
+      :root {
+        --primary: #4e54c8;
+        --secondary: #8f94fb;
+        --danger: #ff4757;
+        --success: #2ed573;
+        --warning: #ffa502;
+        --dark: #2f3542;
+        --light: #f1f2f6;
+        --background: #1e272e;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--background);
+        color: var(--light);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+      }
+
+      /* Animated background */
+      .background {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        opacity: 0.3;
+      }
+
+      .cube {
+        position: absolute;
+        top: 80vh;
+        left: 45vw;
+        width: 10px;
+        height: 10px;
+        border: 1px solid var(--secondary);
+        transform-origin: top left;
+        transform: scale(0) rotate(0deg) translate(-50%, -50%);
+        animation: cube 12s ease-in infinite;
+      }
+
+      .cube:nth-child(2n) {
+        border-color: var(--primary);
+      }
+
+      .cube:nth-child(2) {
+        animation-delay: 2s;
+        left: 25vw;
+        top: 40vh;
+      }
+
+      .cube:nth-child(3) {
+        animation-delay: 4s;
+        left: 75vw;
+        top: 50vh;
+      }
+
+      .cube:nth-child(4) {
+        animation-delay: 6s;
+        left: 90vw;
+        top: 10vh;
+      }
+
+      .cube:nth-child(5) {
+        animation-delay: 8s;
+        left: 10vw;
+        top: 85vh;
+      }
+
+      .cube:nth-child(6) {
+        animation-delay: 10s;
+        left: 50vw;
+        top: 10vh;
+      }
+
+      @keyframes cube {
+        from {
+          transform: scale(0) rotate(0deg) translate(-50%, -50%);
+          opacity: 1;
+        }
+        to {
+          transform: scale(20) rotate(960deg) translate(-50%, -50%);
+          opacity: 0;
+        }
+      }
+
+      header {
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.8;
+      }
+
+      main {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        flex: 1;
+      }
+
+      .container {
+        background-color: rgba(47, 53, 66, 0.8);
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        margin-bottom: 2rem;
+        border: 1px solid var(--primary);
+      }
+
+      .password-input {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .input-group {
+        position: relative;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 5px;
+        border: 2px solid var(--dark);
+        background-color: rgba(47, 53, 66, 0.8);
+        color: var(--light);
+        font-size: 1.2rem;
+        transition: all 0.3s;
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--light);
+        cursor: pointer;
+        font-size: 1.2rem;
+      }
+
+      .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 5px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-block {
+        display: block;
+        width: 100%;
+      }
+
+      .strength-meter {
+        height: 10px;
+        background-color: var(--dark);
+        border-radius: 5px;
+        margin: 1rem 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .strength-meter-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 5px;
+        transition: width 0.5s ease, background-color 0.5s ease;
+      }
+
+      .strength-text {
+        margin-top: 0.5rem;
+        text-align: center;
+        font-weight: bold;
+        min-height: 24px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        color: white;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: #2f3542;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .hacker-gif {
+        width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+      }
+
+      .crack-time {
+        margin-top: 20px;
+        font-size: 1.5rem;
+        color: var(--danger);
+        font-weight: bold;
+      }
+
+      .password-tips {
+        text-align: left;
+        margin: 20px 0;
+      }
+
+      .tip-title {
+        color: var(--secondary);
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+
+      .tips-list {
+        margin-left: 20px;
+      }
+
+      .tips-list li {
+        margin-bottom: 8px;
+      }
+
+      .strength-indicator {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+        font-weight: bold;
+      }
+
+      .feedback-message {
+        margin: 15px 0;
+        font-style: italic;
+      }
+
+      footer {
+        text-align: center;
+        padding: 1.5rem;
+        background-color: rgba(47, 53, 66, 0.8);
+        margin-top: auto;
+      }
+
+      .hearts {
+        color: #ff6b81;
+        animation: heartBeat 1.3s infinite ease-in-out;
+        display: inline-block;
+        transform-origin: center;
+      }
+
+      @keyframes heartBeat {
+        0% {
+          transform: scale(1);
+        }
+        14% {
+          transform: scale(1.3);
+        }
+        28% {
+          transform: scale(1);
+        }
+        42% {
+          transform: scale(1.3);
+        }
+        70% {
+          transform: scale(1);
+        }
+      }
+
+      /* Animation for the hacker attacking */
+      .hacker-animation {
+        font-size: 2rem;
+        margin: 20px 0;
+        animation: hackAttack 0.5s infinite;
+      }
+
+      @keyframes hackAttack {
+        0% {
+          transform: translateX(-2px);
+        }
+        50% {
+          transform: translateX(2px);
+        }
+        100% {
+          transform: translateX(-2px);
+        }
+      }
+
+      .animated-dots span {
+        animation: dots 1.5s infinite;
+        animation-fill-mode: both;
+        font-size: 1.5rem;
+      }
+
+      .animated-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .animated-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes dots {
+        0% {
+          opacity: 0.2;
+        }
+        20% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.2;
+        }
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        header {
+          padding: 1.5rem 1rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .container {
+          padding: 1.5rem;
+        }
+
+        .modal-content {
+          width: 95%;
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background">
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+    </div>
+
+    <header>
+      <h1>🔐 Password Protector</h1>
+      <p class="subtitle">Can your password survive a hacker attack?</p>
+    </header>
+
+    <main>
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 20px">
+          Challenge the Hacker
+        </h2>
+        <p style="text-align: center; margin-bottom: 20px">
+          Create a strong password that's hard to crack. The longer it takes the
+          hacker to crack your password, the better your score!
+        </p>
+
+        <div class="password-input">
+          <div class="input-group">
+            <input
+              type="password"
+              id="passwordInput"
+              placeholder="Type your password here..."
+              autocomplete="off"
+            />
+            <button class="toggle-password" id="togglePassword">👁️</button>
+          </div>
+
+          <div class="strength-meter">
+            <div class="strength-meter-fill" id="strengthMeterFill"></div>
+          </div>
+
+          <div class="strength-text" id="strengthText"></div>
+
+          <button class="btn btn-block" id="testButton">
+            Test Your Password
+          </button>
+        </div>
+
+        <div class="modal" id="hackingModal">
+          <div class="modal-content">
+            <div id="hackerAnimation">
+              <div class="hacker-animation">👨‍💻</div>
+              <p>
+                Hacker is attacking your password<span class="animated-dots"
+                  ><span>.</span><span>.</span><span>.</span></span
+                >
+              </p>
+            </div>
+
+            <div id="resultContent" style="display: none">
+              <h3>Password Analysis Results</h3>
+              <div class="strength-indicator" id="strengthIndicator">
+                Moderate
+              </div>
+              <div class="crack-time" id="crackTimeDisplay">
+                Cracked in: <span id="crackTime">0</span>
+              </div>
+
+              <div class="feedback-message" id="feedbackMessage">
+                Your password could be stronger!
+              </div>
+
+              <div class="password-tips">
+                <h4 class="tip-title">How to improve your password:</h4>
+                <ul class="tips-list" id="tipsList">
+                  <!-- Tips will be populated dynamically -->
+                </ul>
+              </div>
+
+              <button class="btn btn-block" id="newPasswordBtn">
+                Test A New Password
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>
+        Created with <span class="hearts">❤️</span> for better cybersecurity |
+        Password Challenge 2025
+      </p>
+    </footer>
+
+    <script>
+      // DOM Elements
+      const passwordInput = document.getElementById("passwordInput");
+      const togglePassword = document.getElementById("togglePassword");
+      const strengthMeterFill = document.getElementById("strengthMeterFill");
+      const strengthText = document.getElementById("strengthText");
+      const testButton = document.getElementById("testButton");
+      const hackingModal = document.getElementById("hackingModal");
+      const hackerAnimation = document.getElementById("hackerAnimation");
+      const resultContent = document.getElementById("resultContent");
+      const strengthIndicator = document.getElementById("strengthIndicator");
+      const crackTime = document.getElementById("crackTime");
+      const feedbackMessage = document.getElementById("feedbackMessage");
+      const tipsList = document.getElementById("tipsList");
+      const newPasswordBtn = document.getElementById("newPasswordBtn");
+
+      // Variables
+      let currentPasswordScore = 0;
+      let passwordCharTypes = 0;
+
+      // Initialize the application
+      function init() {
+        addEventListeners();
+      }
+
+      function addEventListeners() {
+        let debounceTimer;
+        passwordInput.addEventListener("input", () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(checkPasswordStrength, 200);
+        });
+
+        togglePassword.addEventListener("click", togglePasswordVisibility);
+        testButton.addEventListener("click", startHackerChallenge);
+        newPasswordBtn.addEventListener("click", resetChallenge);
+      }
+
+      function checkPasswordStrength() {
+        const value = passwordInput.value;
+        if (!value.trim()) {
+          strengthMeterFill.style.width = "0";
+          strengthText.textContent = "";
+          return;
+        }
+
+        let score = 0;
+        let types = 0;
+
+        const hasLower = /[a-z]/.test(value);
+        const hasUpper = /[A-Z]/.test(value);
+        const hasNumber = /\d/.test(value);
+        const hasSymbol = /[^A-Za-z0-9]/.test(value);
+        const lengthBonus = value.length >= 12 ? 1 : 0;
+
+        types = [hasLower, hasUpper, hasNumber, hasSymbol].filter(
+          Boolean
+        ).length;
+        passwordCharTypes = types;
+
+        score = value.length * 5 + types * 10 + lengthBonus * 10;
+        score = Math.min(score, 100);
+
+        currentPasswordScore = score;
+        strengthMeterFill.style.width = `${score}%`;
+        strengthMeterFill.style.backgroundColor =
+          score < 40 ? "#ff4757" : score < 70 ? "#ffa502" : "#2ed573";
+        strengthText.textContent =
+          score < 40 ? "Weak" : score < 70 ? "Moderate" : "Strong";
+      }
+
+      function togglePasswordVisibility() {
+        passwordInput.type =
+          passwordInput.type === "password" ? "text" : "password";
+      }
+
+      function startHackerChallenge() {
+        const password = passwordInput.value.trim();
+        if (!password) {
+          alert("Please enter a password first!");
+          return;
+        }
+
+        // Show the modal
+        hackingModal.style.display = "flex";
+        hackerAnimation.innerHTML = `
+    <img src="assets/hacker/1.png" class="hacker-gif" id="hackerImg" />
+  `;
+        hackerAnimation.style.display = "block";
+        resultContent.style.display = "none";
+
+        // Change to second image after 2 seconds
+        setTimeout(() => {
+          const hackerImg = document.getElementById("hackerImg");
+          if (hackerImg) hackerImg.src = "assets/hacker/2.png";
+        }, 2000);
+
+        // After 5 seconds total, show the result
+        setTimeout(() => {
+          showHackingResults(password);
+        }, 5000);
+      }
+
+      function showHackingResults(password) {
+        const crackTimeSeconds = calculateCrackTime(password);
+        const formattedTime = formatCrackTime(crackTimeSeconds);
+
+        // Determine success or fail
+        const isSuccess = crackTimeSeconds / 60 <= 5; // under 5 mins = success
+
+        // Show final result image
+        hackerAnimation.innerHTML = `
+    <img src="assets/hacker/${isSuccess ? "3" : "4"}.png" class="hacker-gif" />
+  `;
+
+        // Show result content
+        resultContent.style.display = "block";
+        crackTime.textContent = formattedTime;
+
+        strengthIndicator.textContent =
+          currentPasswordScore < 40
+            ? "Weak"
+            : currentPasswordScore < 70
+            ? "Moderate"
+            : "Strong";
+
+        strengthIndicator.style.backgroundColor =
+          currentPasswordScore < 40
+            ? "#ff4757"
+            : currentPasswordScore < 70
+            ? "#ffa502"
+            : "#2ed573";
+
+        if (currentPasswordScore < 40) {
+          feedbackMessage.textContent =
+            "Your password is too weak and was easily cracked!";
+        } else if (currentPasswordScore < 70) {
+          feedbackMessage.textContent =
+            "Your password provides moderate protection, but could be stronger.";
+        } else {
+          feedbackMessage.textContent =
+            "Great job! Your password is strong and difficult to crack.";
+        }
+
+        generatePasswordTips(password);
+      }
+
+      function calculateCrackTime(password) {
+        // This is a simplified model for educational purposes
+        const length = password.length;
+        const charsetSize = calculateCharsetSize();
+
+        // Basic formula: charsetSize^length / guesses per second
+        // Assuming 1 billion guesses per second for a typical hacker
+        const guessesPerSecond = 1000000000;
+
+        // Calculation with entropy estimation
+        let entropy = length * Math.log2(charsetSize);
+        let seconds = Math.pow(2, entropy) / guessesPerSecond;
+
+        // Add some randomness to make it more realistic
+        seconds = seconds * (0.8 + Math.random() * 0.4);
+
+        // Minimum and maximum values
+        return Math.max(0.1, Math.min(seconds, 9.99e20));
+      }
+
+      function calculateCharsetSize() {
+        // Calculate the character set size based on password content
+        const hasLower = /[a-z]/.test(passwordInput.value);
+        const hasUpper = /[A-Z]/.test(passwordInput.value);
+        const hasNumber = /\d/.test(passwordInput.value);
+        const hasSymbol = /[^A-Za-z0-9]/.test(passwordInput.value);
+
+        let size = 0;
+        if (hasLower) size += 26;
+        if (hasUpper) size += 26;
+        if (hasNumber) size += 10;
+        if (hasSymbol) size += 33;
+
+        return size > 0 ? size : 26; // Default to lowercase if somehow none matched
+      }
+
+      function formatCrackTime(seconds) {
+        if (seconds < 1) return `${(seconds * 1000).toFixed(0)} milliseconds`;
+        if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
+        if (seconds < 3600) return `${(seconds / 60).toFixed(1)} minutes`;
+        if (seconds < 86400) return `${(seconds / 3600).toFixed(1)} hours`;
+        if (seconds < 2592000) return `${(seconds / 86400).toFixed(1)} days`;
+        if (seconds < 31536000)
+          return `${(seconds / 2592000).toFixed(1)} months`;
+        if (seconds < 315360000)
+          return `${(seconds / 31536000).toFixed(1)} years`;
+        if (seconds < 3153600000)
+          return `${(seconds / 31536000).toFixed(0)} years`;
+        return "over 100 years";
+      }
+
+      function generatePasswordTips(password) {
+        tipsList.innerHTML = "";
+        const tips = [];
+
+        // Length check
+        if (password.length < 12) {
+          tips.push(
+            "Make your password longer (aim for at least 12 characters)"
+          );
+        }
+
+        // Character variety check
+        const hasLower = /[a-z]/.test(password);
+        const hasUpper = /[A-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+        if (!hasLower) tips.push("Add lowercase letters (a-z)");
+        if (!hasUpper) tips.push("Add uppercase letters (A-Z)");
+        if (!hasNumber) tips.push("Add numbers (0-9)");
+        if (!hasSymbol) tips.push("Add special characters (!@#$%^&*)");
+
+        // Common patterns check
+        if (/(\w)\1{2,}/.test(password)) {
+          tips.push("Avoid repeated characters (like 'aaa' or '111')");
+        }
+
+        if (/^(qwerty|asdfgh|zxcvbn|12345|password)/i.test(password)) {
+          tips.push("Avoid common keyboard patterns and words like 'password'");
+        }
+
+        // If password is already strong
+        if (tips.length === 0) {
+          tips.push(
+            "Your password is already strong! Remember to use different passwords for different accounts."
+          );
+        }
+
+        // Add tips to the list
+        tips.forEach((tip) => {
+          const li = document.createElement("li");
+          li.textContent = tip;
+          tipsList.appendChild(li);
+        });
+      }
+
+      function resetChallenge() {
+        hackingModal.style.display = "none";
+        passwordInput.value = "";
+        strengthMeterFill.style.width = "0";
+        strengthText.textContent = "";
+        currentPasswordScore = 0;
+      }
+
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
