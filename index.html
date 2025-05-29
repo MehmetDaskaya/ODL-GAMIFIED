@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Password Protector: Beat the Hacker</title>
+
     <style>
       :root {
         --primary: #4e54c8;
@@ -128,10 +129,46 @@
       .container {
         background-color: rgba(47, 53, 66, 0.8);
         border-radius: 10px;
-        padding: 2rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        margin-bottom: 2rem;
+        margin: 2rem auto;
         border: 1px solid var(--primary);
+        max-width: 100%;
+        width: 100%;
+        overflow: hidden;
+        transition: max-height 0.6s ease, opacity 0.6s ease, padding 0.4s ease;
+      }
+
+      .container.collapsed .container-content {
+        max-height: 0;
+        opacity: 0;
+        padding: 0;
+        overflow: hidden;
+        transition: all 0.6s ease;
+      }
+
+      .container-content {
+        padding: 2rem;
+        transition: all 0.6s ease;
+      }
+
+      .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: none;
+        padding: 1rem 1.5rem;
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
+
+      .toggle-icon {
+        cursor: pointer;
+        font-size: 1.5rem;
+        transition: transform 0.3s ease;
+      }
+
+      .container.collapsed .toggle-icon {
+        transform: rotate(-90deg);
       }
 
       .password-input {
@@ -393,6 +430,114 @@
           padding: 1rem;
         }
       }
+
+      .info-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-left: 4px solid var(--secondary);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.4s ease;
+      }
+
+      .info-box h3 {
+        margin-bottom: 0.5rem;
+        color: var(--secondary);
+      }
+      .info-box li {
+        padding-left: 0.5rem;
+        /* remove dots */
+        list-style-type: none;
+      }
+
+      .info-box-content {
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.6s ease;
+      }
+
+      .info-box.open .info-box-content {
+        max-height: 500px;
+      }
+
+      #quizOptions li {
+        list-style: none;
+      }
+
+      #quizOptions input[type="radio"] {
+        margin-right: 10px;
+      }
+
+      #quizModal ul {
+        padding: 0;
+      }
+    </style>
+    <style>
+      .quiz-option {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid transparent;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .quiz-option:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--secondary);
+      }
+
+      .quiz-option.selected {
+        border-color: var(--primary);
+        background: rgba(78, 84, 200, 0.2);
+      }
+
+      .quiz-option.correct {
+        border-color: var(--success);
+        background: rgba(46, 213, 115, 0.2);
+      }
+
+      .quiz-option.incorrect {
+        border-color: var(--danger);
+        background: rgba(255, 71, 87, 0.2);
+      }
+
+      .question-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--secondary);
+      }
+
+      .question-item.correct {
+        border-left-color: var(--success);
+      }
+
+      .question-item.incorrect {
+        border-left-color: var(--danger);
+      }
+
+      .answer-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .answer-status.correct {
+        background: var(--success);
+        color: white;
+      }
+
+      .answer-status.incorrect {
+        background: var(--danger);
+        color: white;
+      }
     </style>
   </head>
   <body>
@@ -412,70 +557,295 @@
 
     <main>
       <div class="container">
-        <h2 style="text-align: center; margin-bottom: 20px">
-          Challenge the Hacker
-        </h2>
-        <p style="text-align: center; margin-bottom: 20px">
-          Create a strong password that's hard to crack. The longer it takes the
-          hacker to crack your password, the better your score!
-        </p>
-
-        <div class="password-input">
-          <div class="input-group">
-            <input
-              type="password"
-              id="passwordInput"
-              placeholder="Type your password here..."
-              autocomplete="off"
-            />
-            <button class="toggle-password" id="togglePassword">👁️</button>
-          </div>
-
-          <div class="strength-meter">
-            <div class="strength-meter-fill" id="strengthMeterFill"></div>
-          </div>
-
-          <div class="strength-text" id="strengthText"></div>
-
-          <button class="btn btn-block" id="testButton">
-            Test Your Password
-          </button>
+        <div class="container-header">
+          <span>Step 1: Learn About Password Security </span>
+          <span class="toggle-icon" onclick="toggleContainer(this)">▼</span>
         </div>
-
-        <div class="modal" id="hackingModal">
-          <div class="modal-content">
-            <div id="hackerAnimation">
-              <div class="hacker-animation">👨‍💻</div>
+        <div class="container-content">
+          <div class="info-box">
+            <h3>🔐 Why Password Security Matters</h3>
+            <div class="info-box-content">
               <p>
-                Hacker is attacking your password<span class="animated-dots"
-                  ><span>.</span><span>.</span><span>.</span></span
-                >
+                Over 80% of data breaches result from weak or stolen
+                passwords...
               </p>
             </div>
+          </div>
 
-            <div id="resultContent" style="display: none">
-              <h3>Password Analysis Results</h3>
-              <div class="strength-indicator" id="strengthIndicator">
-                Moderate
-              </div>
-              <div class="crack-time" id="crackTimeDisplay">
-                Cracked in: <span id="crackTime">0</span>
+          <div class="info-box">
+            <h3>⚠️ Risks of Weak Passwords</h3>
+            <ul>
+              <li>🔓 Identity theft and financial fraud</li>
+              <li>🔁 Account takeover across platforms</li>
+              <li>🎭 Social engineering attacks</li>
+            </ul>
+          </div>
+
+          <div class="info-box">
+            <h3>📚 What You Will Learn</h3>
+            <p>In this module, you'll learn how to:</p>
+            <ul>
+              <li>Create strong and memorable passwords</li>
+              <li>Test your password strength</li>
+              <li>Follow best practices for managing passwords</li>
+            </ul>
+          </div>
+
+          <div class="info-box">
+            <h3>🔍 Check If Your Password Was Leaked</h3>
+            <p>
+              Use
+              <a
+                href="https://haveibeenpwned.com"
+                target="_blank"
+                style="color: var(--secondary); text-decoration: underline"
+                >Have I Been Pwned</a
+              >
+              to check if your passwords or email addresses have been part of
+              any known data breaches.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="container-header">
+          <span>Step 2: Challenge the Hacker </span>
+          <span class="toggle-icon" onclick="toggleContainer(this)">▼</span>
+        </div>
+        <div class="container-content">
+          <img
+            src="assets/hacker/1.png"
+            alt="Hacker Animation"
+            class="hacker-gif"
+          />
+          <p style="text-align: center; margin-bottom: 20px">
+            Create a strong password that's hard to crack. The longer it takes
+            the hacker to crack your password, the better your score!
+          </p>
+
+          <div class="password-input">
+            <div class="input-group">
+              <input
+                type="password"
+                id="passwordInput"
+                placeholder="Type your password here..."
+                autocomplete="off"
+              />
+              <button class="toggle-password" id="togglePassword">👁️</button>
+            </div>
+
+            <div class="strength-text" id="strengthText"></div>
+
+            <button class="btn btn-block" id="testButton">
+              Test Your Password
+            </button>
+          </div>
+
+          <div class="modal" id="hackingModal">
+            <div class="modal-content">
+              <div id="hackerAnimation">
+                <div class="hacker-animation">👨‍💻</div>
+                <p>
+                  Hacker is attacking your password<span class="animated-dots"
+                    ><span>.</span><span>.</span><span>.</span></span
+                  >
+                </p>
               </div>
 
-              <div class="feedback-message" id="feedbackMessage">
-                Your password could be stronger!
-              </div>
+              <div id="resultContent" style="display: none">
+                <h3>Password Analysis Results</h3>
+                <div class="strength-indicator" id="strengthIndicator">
+                  Moderate
+                </div>
+                <div class="strength-meter">
+                  <div class="strength-meter-fill" id="strengthMeterFill"></div>
+                </div>
+                <div class="crack-time" id="crackTimeDisplay">
+                  Cracked in: <span id="crackTime">0</span>
+                </div>
 
-              <div class="password-tips">
-                <h4 class="tip-title">How to improve your password:</h4>
-                <ul class="tips-list" id="tipsList">
-                  <!-- Tips will be populated dynamically -->
-                </ul>
-              </div>
+                <div class="feedback-message" id="feedbackMessage">
+                  Your password could be stronger!
+                </div>
 
-              <button class="btn btn-block" id="newPasswordBtn">
-                Test A New Password
+                <div class="password-tips">
+                  <h4 class="tip-title">How to improve your password:</h4>
+                  <ul class="tips-list" id="tipsList">
+                    <!-- Tips will be populated dynamically -->
+                  </ul>
+                </div>
+
+                <button class="btn btn-block" id="newPasswordBtn">
+                  Test A New Password
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Replace the existing quiz container section with this: -->
+      <div class="container quiz-container collapsed" id="step3Container">
+        <div class="container-header">
+          <span>Step 3: Take the Quiz</span>
+          <span class="toggle-icon" onclick="toggleContainer(this)">▼</span>
+        </div>
+        <div class="container-content" style="text-align: center">
+          <p>Test your knowledge with a cybersecurity quiz!</p>
+          <div id="quizProgress" style="display: none; margin: 15px 0">
+            <div
+              style="
+                background: var(--dark);
+                height: 8px;
+                border-radius: 4px;
+                overflow: hidden;
+              "
+            >
+              <div
+                id="progressBar"
+                style="
+                  background: var(--secondary);
+                  height: 100%;
+                  width: 0%;
+                  transition: width 0.3s;
+                "
+              ></div>
+            </div>
+            <p style="margin-top: 8px; font-size: 0.9rem">
+              Question <span id="currentQ">1</span> of
+              <span id="totalQ">20</span>
+            </p>
+          </div>
+          <button class="btn btn-block" onclick="startQuiz()">
+            Start Quiz
+          </button>
+        </div>
+      </div>
+
+      <!-- Replace the existing quiz modal with this: -->
+      <div class="modal" id="quizModal">
+        <div class="modal-content" style="max-width: 700px">
+          <!-- Quiz Question View -->
+          <div id="quizQuestionView">
+            <h3 id="quizQuestion">Loading...</h3>
+            <ul id="quizOptions" style="text-align: left; margin: 20px 0"></ul>
+            <div
+              id="quizFeedback"
+              style="
+                display: none;
+                margin: 15px 0;
+                padding: 15px;
+                border-radius: 5px;
+              "
+            ></div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-top: 1rem;
+              "
+            >
+              <button
+                class="btn"
+                id="prevBtn"
+                onclick="prevQuestion()"
+                disabled
+              >
+                ← Back
               </button>
+              <button
+                class="btn"
+                id="nextBtn"
+                onclick="nextQuestion()"
+                disabled
+              >
+                Next →
+              </button>
+            </div>
+            <button
+              class="btn btn-block"
+              style="margin-top: 1rem"
+              onclick="submitQuiz()"
+            >
+              Submit Quiz
+            </button>
+          </div>
+
+          <!-- Quiz Results View -->
+          <div id="quizResultsView" style="display: none">
+            <h2 style="color: var(--secondary); margin-bottom: 20px">
+              🎯 Quiz Results
+            </h2>
+
+            <div
+              style="
+                background: rgba(255, 255, 255, 0.1);
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 15px;
+                "
+              >
+                <span style="font-size: 1.2rem">Your Score:</span>
+                <span
+                  id="finalScore"
+                  style="
+                    font-size: 2rem;
+                    font-weight: bold;
+                    color: var(--success);
+                  "
+                  >0/20</span
+                >
+              </div>
+              <div
+                style="
+                  background: var(--dark);
+                  height: 12px;
+                  border-radius: 6px;
+                  overflow: hidden;
+                "
+              >
+                <div
+                  id="scoreBar"
+                  style="
+                    background: var(--success);
+                    height: 100%;
+                    width: 0%;
+                    transition: width 1s ease;
+                  "
+                ></div>
+              </div>
+              <p
+                id="scoreMessage"
+                style="margin-top: 10px; font-style: italic"
+              ></p>
+            </div>
+
+            <div style="text-align: left">
+              <h3 style="color: var(--secondary); margin-bottom: 15px">
+                📋 Question Review
+              </h3>
+              <div
+                id="questionReview"
+                style="max-height: 400px; overflow-y: auto; padding-right: 10px"
+              ></div>
+            </div>
+
+            <div style="margin-top: 20px">
+              <button
+                class="btn"
+                onclick="retakeQuiz()"
+                style="margin-right: 10px"
+              >
+                🔄 Retake Quiz
+              </button>
+              <button class="btn" onclick="closeQuiz()">✅ Finish</button>
             </div>
           </div>
         </div>
@@ -485,7 +855,7 @@
     <footer>
       <p>
         Created with <span class="hearts">❤️</span> for better cybersecurity |
-        Password Challenge 2025
+        Open and Distance Learning 2025
       </p>
     </footer>
 
@@ -570,12 +940,14 @@
           alert("Please enter a password first!");
           return;
         }
+        document.getElementById("step3Container").classList.remove("collapsed");
+        quizTried = true;
 
         // Show the modal
         hackingModal.style.display = "flex";
         hackerAnimation.innerHTML = `
-    <img src="assets/hacker/1.png" class="hacker-gif" id="hackerImg" />
-  `;
+        <img src="assets/hacker/1.png" class="hacker-gif" id="hackerImg" />
+      `;
         hackerAnimation.style.display = "block";
         resultContent.style.display = "none";
 
@@ -600,8 +972,10 @@
 
         // Show final result image
         hackerAnimation.innerHTML = `
-    <img src="assets/hacker/${isSuccess ? "3" : "4"}.png" class="hacker-gif" />
-  `;
+        <img src="assets/hacker/${
+          isSuccess ? "3" : "4"
+        }.png" class="hacker-gif" />
+      `;
 
         // Show result content
         resultContent.style.display = "block";
@@ -741,6 +1115,503 @@
       }
 
       window.addEventListener("DOMContentLoaded", init);
+      function toggleContainer(icon) {
+        const container = icon.closest(".container");
+        container.classList.toggle("collapsed");
+      }
+    </script>
+
+    <!-- Data for questions -->
+    <script id="quizData" type="application/json">
+      [
+        {
+          "id": 1,
+          "question": "Which of the following is a best practice for creating secure passwords?",
+          "options": [
+            "A) Using a dictionary word with some numbers",
+            "B) Choosing a password you can type fast",
+            "C) Using a unique password for each account",
+            "D) Including your phone number"
+          ],
+          "correct": "C",
+          "explanation": "Best practice includes using unique, strong passwords per account to prevent mass compromise."
+        },
+        {
+          "id": 2,
+          "question": "What is a common method hackers use to crack weak passwords quickly?",
+          "options": [
+            "A) CAPTCHA solving",
+            "B) Brute-force attacks",
+            "C) Email phishing",
+            "D) Wi-Fi jamming"
+          ],
+          "correct": "B",
+          "explanation": "Brute-force attacks involve trying all possible combinations of characters until the correct password is found. Weak or short passwords are especially vulnerable."
+        },
+        {
+          "id": 3,
+          "question": "What is the recommended minimum length for a secure password, according to cybersecurity experts?",
+          "options": [
+            "A) 4 characters",
+            "B) 6 characters",
+            "C) 8 characters",
+            "D) 12 characters or more"
+          ],
+          "correct": "D",
+          "explanation": "Longer passwords (12+ characters) significantly increase entropy, making them much harder to crack through brute-force or dictionary attacks."
+        },
+        {
+          "id": 4,
+          "question": "Which of the following is the safest way to store your passwords?",
+          "options": [
+            "A) Writing them in a notebook",
+            "B) Saving them in your browser",
+            "C) Using a trusted password manager",
+            "D) Memorizing one password and reusing it"
+          ],
+          "correct": "C",
+          "explanation": "A reputable password manager encrypts and securely stores your passwords, generating strong, unique ones for each account."
+        },
+        {
+          "id": 5,
+          "question": "What is “phishing” in the context of cybersecurity?",
+          "options": [
+            "A) Using AI to guess passwords",
+            "B) Tricking users into revealing personal information through fake websites or emails",
+            "C) Hacking into social media profiles using brute-force",
+            "D) Sharing passwords with friends over encrypted chat"
+          ],
+          "correct": "B",
+          "explanation": "Phishing is a common cyberattack that deceives users into revealing sensitive information like passwords by pretending to be a trustworthy source."
+        },
+        {
+          "id": 6,
+          "question": "Which factor does crack time depend on most?",
+          "options": [
+            "A) Whether you can remember the password",
+            "B) How fast you type it",
+            "C) The password's entropy",
+            "D) Whether it's been used before"
+          ],
+          "correct": "C",
+          "explanation": "Crack time is calculated using entropy, which measures password randomness and complexity."
+        },
+        {
+          "id": 7,
+          "question": "What is the danger of reusing the same password on multiple sites?",
+          "options": [
+            "A) It makes typing easier",
+            "B) One compromised account can lead to many breaches",
+            "C) It improves memory",
+            "D) It's safer with 2FA"
+          ],
+          "correct": "B",
+          "explanation": "If one reused password is leaked, attackers can try it on other platforms to compromise multiple accounts."
+        },
+        {
+          "id": 8,
+          "question": "What kind of passwords are easiest for attackers to guess?",
+          "options": [
+            "A) Random strings of symbols and letters",
+            "B) Long sentences with random punctuation",
+            "C) Keyboard patterns like '123456' or 'qwerty'",
+            "D) Passphrases using unrelated words"
+          ],
+          "correct": "C",
+          "explanation": "Attackers use pattern recognition and dictionaries; common sequences like '123456' are guessed instantly."
+        },
+        {
+          "id": 9,
+          "question": "Why is adding symbols to your password important?",
+          "options": [
+            "A) It looks cool",
+            "B) It satisfies password requirements",
+            "C) It increases character variety, raising entropy",
+            "D) It's easier to remember"
+          ],
+          "correct": "C",
+          "explanation": "Symbols expand the character set, which increases the total number of possible combinations, making your password harder to crack."
+        },
+        {
+          "id": 10,
+          "question": "Which of the following tools helps manage strong, unique passwords safely?",
+          "options": [
+            "A) Spreadsheet software",
+            "B) Physical notebook",
+            "C) Password manager",
+            "D) Sticky notes"
+          ],
+          "correct": "C",
+          "explanation": "A password manager stores and generates complex passwords securely using encryption, reducing the need to memorize them."
+        },
+        {
+          "id": 11,
+          "question": "What does \"password entropy\" refer to?",
+          "options": [
+            "A) The number of times a password has been used",
+            "B) The complexity and unpredictability of a password",
+            "C) How fast you can type your password",
+            "D) The number of symbols used"
+          ],
+          "correct": "B",
+          "explanation": "Entropy measures randomness and complexity. High entropy means a password is harder to guess or brute-force."
+        },
+        {
+          "id": 12,
+          "question": "Which of the following passwords has the highest entropy?",
+          "options": [
+            "A) Password123",
+            "B) !Q2w#E4r",
+            "C) iloveyou2024",
+            "D) sunshine!"
+          ],
+          "correct": "B",
+          "explanation": "!Q2w#E4r uses a mix of characters, symbols, and cases, making it more complex and less predictable than the others."
+        },
+        {
+          "id": 13,
+          "question": "What is the primary purpose of two-factor authentication (2FA)?",
+          "options": [
+            "A) To back up your password in case you forget it",
+            "B) To limit internet access",
+            "C) To provide an extra layer of security by requiring a second verification step",
+            "D) To automatically change your password every month"
+          ],
+          "correct": "C",
+          "explanation": "2FA requires a second factor (like a phone code) in addition to your password, making unauthorized access more difficult."
+        },
+        {
+          "id": 14,
+          "question": "Which type of password is MOST vulnerable to dictionary attacks?",
+          "options": [
+            "A) R@!8v7Xn",
+            "B) 123456",
+            "C) qwertyuiop",
+            "D) sunshine"
+          ],
+          "correct": "D",
+          "explanation": "Common words like \"sunshine\" are often found in dictionaries used by attackers, making them easier to crack."
+        },
+        {
+          "id": 15,
+          "question": "What happens when a password is \"hashed\"?",
+          "options": [
+            "A) It is turned into a reversible string",
+            "B) It’s encrypted and stored securely",
+            "C) It is converted into a fixed-length, unreadable string using an algorithm",
+            "D) It’s saved in plain text for later use"
+          ],
+          "correct": "C",
+          "explanation": "Hashing transforms a password into an unreadable format. Good systems store only hashed passwords, not the actual text."
+        },
+        {
+          "id": 16,
+          "question": "How often should you ideally change your passwords for important accounts?",
+          "options": [
+            "A) Every week",
+            "B) Every 2–3 years",
+            "C) Only when you forget them",
+            "D) Every few months or after a suspected breach"
+          ],
+          "correct": "D",
+          "explanation": "While frequent changes aren’t always required, changing passwords after breaches or periodically helps reduce risk."
+        },
+        {
+          "id": 17,
+          "question": "What is the risk of using personal info (like birthdays or names) in passwords?",
+          "options": [
+            "A) It makes the password too long",
+            "B) It helps you remember passwords better",
+            "C) It increases the risk of social engineering attacks",
+            "D) There is no risk"
+          ],
+          "correct": "C",
+          "explanation": "Hackers can use publicly available info (like social media) to guess passwords with personal data."
+        },
+        {
+          "id": 18,
+          "question": "Which of the following is a false statement about password managers?",
+          "options": [
+            "A) They can generate strong, random passwords",
+            "B) They allow you to use the same password for every account",
+            "C) They securely store login credentials",
+            "D) They often require a master password to access"
+          ],
+          "correct": "B",
+          "explanation": "Password managers encourage unique passwords per site; reusing passwords defeats their purpose."
+        },
+        {
+          "id": 19,
+          "question": "What does a \"credential stuffing attack\" involve?",
+          "options": [
+            "A) Randomly trying millions of passwords",
+            "B) Using leaked usernames and passwords from one site to access others",
+            "C) Stealing passwords via keyloggers",
+            "D) Encrypting your passwords and asking for ransom"
+          ],
+          "correct": "B",
+          "explanation": "In credential stuffing, attackers use leaked login info from one site to attempt access to other accounts."
+        },
+        {
+          "id": 20,
+          "question": "Which behavior is MOST likely to improve your online security long-term?",
+          "options": [
+            "A) Using passwords that are easy to type quickly",
+            "B) Writing down all passwords in a personal notebook",
+            "C) Using a different, strong password for every site and enabling 2FA",
+            "D) Sticking to the same password as long as you remember it"
+          ],
+          "correct": "C",
+          "explanation": "Unique, strong passwords + 2FA = strong defense. Repetition or physical notes may leave you exposed."
+        }
+      ]
+    </script>
+    <!-- Replace the existing quiz JavaScript with this: -->
+    <script>
+      // Quiz functionality
+      let quizData = JSON.parse(
+        document.getElementById("quizData").textContent
+      );
+      let quizIndex = 0;
+      let quizTried = false;
+      let userAnswers = [];
+      let quizStarted = false;
+      let selectedAnswer = null;
+
+      function startQuiz() {
+        document.getElementById("quizModal").style.display = "flex";
+        document.getElementById("quizProgress").style.display = "block";
+        document.getElementById("quizQuestionView").style.display = "block";
+        document.getElementById("quizResultsView").style.display = "none";
+
+        quizIndex = 0;
+        userAnswers = [];
+        quizStarted = true;
+        selectedAnswer = null;
+
+        updateProgress();
+        renderQuestion();
+      }
+
+      function updateProgress() {
+        const progress = ((quizIndex + 1) / quizData.length) * 100;
+        document.getElementById("progressBar").style.width = progress + "%";
+        document.getElementById("currentQ").textContent = quizIndex + 1;
+        document.getElementById("totalQ").textContent = quizData.length;
+      }
+
+      function renderQuestion() {
+        const q = quizData[quizIndex];
+        document.getElementById("quizQuestion").textContent = `Question ${
+          quizIndex + 1
+        }: ${q.question}`;
+
+        const optionsList = document.getElementById("quizOptions");
+        const feedback = document.getElementById("quizFeedback");
+
+        optionsList.innerHTML = "";
+        feedback.style.display = "none";
+        selectedAnswer = null;
+
+        // Get user's previous answer for this question
+        const previousAnswer = userAnswers[quizIndex];
+
+        q.options.forEach((opt, i) => {
+          const li = document.createElement("li");
+          li.className = "quiz-option";
+          li.style.listStyle = "none";
+
+          const optionLetter = opt.charAt(0); // A, B, C, D
+          const isSelected = previousAnswer === optionLetter;
+
+          if (isSelected) {
+            li.classList.add("selected");
+            selectedAnswer = optionLetter;
+          }
+
+          li.innerHTML = `<label style="cursor: pointer; display: block;">
+            <input type="radio" name="quizOption" value="${optionLetter}" style="margin-right: 10px;" ${
+            isSelected ? "checked" : ""
+          }>
+            ${opt}
+          </label>`;
+
+          li.addEventListener("click", () => selectAnswer(optionLetter, li));
+          optionsList.appendChild(li);
+        });
+
+        updateNavigationButtons();
+      }
+
+      function selectAnswer(answer, element) {
+        // Remove previous selection
+        document.querySelectorAll(".quiz-option").forEach((opt) => {
+          opt.classList.remove("selected");
+        });
+
+        // Add selection to clicked option
+        element.classList.add("selected");
+        element.querySelector("input").checked = true;
+
+        selectedAnswer = answer;
+        userAnswers[quizIndex] = answer;
+
+        updateNavigationButtons();
+      }
+
+      function updateNavigationButtons() {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        prevBtn.disabled = quizIndex === 0;
+        nextBtn.disabled = !selectedAnswer || quizIndex === quizData.length - 1;
+
+        // Update button text for last question
+        if (quizIndex === quizData.length - 1) {
+          nextBtn.style.display = "none";
+        } else {
+          nextBtn.style.display = "inline-block";
+        }
+      }
+
+      function prevQuestion() {
+        if (quizIndex > 0) {
+          quizIndex--;
+          updateProgress();
+          renderQuestion();
+        }
+      }
+
+      function nextQuestion() {
+        if (quizIndex < quizData.length - 1 && selectedAnswer) {
+          quizIndex++;
+          selectedAnswer = null;
+          updateProgress();
+          renderQuestion();
+        }
+      }
+
+      function submitQuiz() {
+        // Check if all questions are answered
+        const unansweredQuestions = [];
+        for (let i = 0; i < quizData.length; i++) {
+          if (!userAnswers[i]) {
+            unansweredQuestions.push(i + 1);
+          }
+        }
+
+        if (unansweredQuestions.length > 0) {
+          alert(
+            `Please answer all questions before submitting. Missing: Question(s) ${unansweredQuestions.join(
+              ", "
+            )}`
+          );
+          return;
+        }
+
+        showResults();
+      }
+
+      function showResults() {
+        document.getElementById("quizQuestionView").style.display = "none";
+        document.getElementById("quizResultsView").style.display = "block";
+
+        // Calculate score
+        let correctAnswers = 0;
+        userAnswers.forEach((answer, index) => {
+          if (answer === quizData[index].correct) {
+            correctAnswers++;
+          }
+        });
+
+        const percentage = Math.round((correctAnswers / quizData.length) * 100);
+
+        // Update score display
+        document.getElementById(
+          "finalScore"
+        ).textContent = `${correctAnswers}/${quizData.length}`;
+        document.getElementById("scoreBar").style.width = percentage + "%";
+
+        // Score message
+        let message = "";
+        let scoreColor = "";
+        if (percentage >= 90) {
+          message = "🏆 Excellent! You're a cybersecurity expert!";
+          scoreColor = "var(--success)";
+        } else if (percentage >= 70) {
+          message = "👍 Great job! You have solid cybersecurity knowledge.";
+          scoreColor = "var(--success)";
+        } else if (percentage >= 50) {
+          message = "📚 Good effort! Review the explanations to improve.";
+          scoreColor = "var(--success)";
+        } else {
+          message = "🔄 Keep learning! Cybersecurity takes practice.";
+          scoreColor = "var(--success)";
+        }
+
+        document.getElementById("scoreMessage").textContent = message;
+        document.getElementById("scoreBar").style.background =
+          percentage >= 70
+            ? "var(--success)"
+            : percentage >= 50
+            ? "var(--warning)"
+            : "var(--danger)";
+
+        // Generate question review
+        generateQuestionReview(correctAnswers);
+      }
+
+      function generateQuestionReview(correctAnswers) {
+        const reviewContainer = document.getElementById("questionReview");
+        reviewContainer.innerHTML = "";
+
+        quizData.forEach((q, index) => {
+          const userAnswer = userAnswers[index];
+          const isCorrect = userAnswer === q.correct;
+
+          const questionDiv = document.createElement("div");
+          questionDiv.className = `question-item ${
+            isCorrect ? "correct" : "incorrect"
+          }`;
+
+          questionDiv.innerHTML = `
+            <div class="answer-status ${isCorrect ? "correct" : "incorrect"}">
+              ${isCorrect ? "✅ Correct" : "❌ Incorrect"}
+            </div>
+            <h4 style="margin-bottom: 8px;">Question ${index + 1}: ${
+            q.question
+          }</h4>
+            <p style="margin-bottom: 8px;"><strong>Your Answer:</strong> ${
+              userAnswer || "Not answered"
+            }</p>
+            <p style="margin-bottom: 8px;"><strong>Correct Answer:</strong> ${
+              q.correct
+            }</p>
+            <p style="font-style: italic; color: #ccc;"><strong>Explanation:</strong> ${
+              q.explanation
+            }</p>
+          `;
+
+          reviewContainer.appendChild(questionDiv);
+        });
+      }
+
+      function retakeQuiz() {
+        startQuiz();
+      }
+
+      function closeQuiz() {
+        document.getElementById("quizModal").style.display = "none";
+        quizIndex = 0;
+        userAnswers = [];
+        quizStarted = false;
+        selectedAnswer = null;
+      }
+
+      // Keep the existing openQuiz function for backward compatibility
+      function openQuiz() {
+        startQuiz();
+      }
     </script>
   </body>
 </html>
